@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weightapp-deployment
+spec:
+  selector:
+    matchLabels:
+      app: weightapp
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: weightapp
+    spec:
+      containers:
+        - name: weightapp
+          image: weightapp
+          ports:
+            - containerPort: 3000
+          imagePullPolicy: Never # Image should not be pulled
