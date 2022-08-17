@@ -21,7 +21,7 @@ https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/cre
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
 
 
-https://theekshanawj.medium.com/kubernetes-deploying-a-nodejs-app-in-minikube-local-development-92df31e0b037
+https://theekshanawj.medium.com/kubernetes-deploying-a-nodejs-app-in-micurnikube-local-development-92df31e0b037
 
 
 
@@ -38,4 +38,4 @@ https://theekshanawj.medium.com/kubernetes-deploying-a-nodejs-app-in-minikube-lo
 https://theekshanawj.medium.com/kubernetes-deploying-a-nodejs-app-in-minikube-local-development-92df31e0b037
 
 docker build -t weightapp .
-docker run -p 3000:3000 app 
+docker run -p 3000:3000 weightapp 
