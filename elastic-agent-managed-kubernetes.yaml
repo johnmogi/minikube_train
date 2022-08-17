@@ -1,0 +1,659 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-node-datastreams
+  namespace: kube-system
+  labels:
+    k8s-app: elastic-agent
+data:
+  agent.yml: |-
+    id: 94c1f5c0-1e36-11ed-9241-8bbc97c887a2
+    outputs:
+      default:
+        type: elasticsearch
+        hosts:
+          - 'http://localhost:9200'
+        username: '{ES_USERNAME}'
+        password: '{ES_PASSWORD}'
+    inputs:
+      - id: logfile-system-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+        revision: 1
+        name: system-1
+        type: logfile
+        data_stream:
+          namespace: default
+        use_output: default
+        streams:
+          - id: logfile-system.auth-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: logs
+              dataset: system.auth
+            paths:
+              - /var/log/auth.log*
+              - /var/log/secure*
+            exclude_files:
+              - .gz$
+            multiline:
+              pattern: ^\s
+              match: after
+            processors:
+              - add_locale: null
+          - id: logfile-system.syslog-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: logs
+              dataset: system.syslog
+            paths:
+              - /var/log/messages*
+              - /var/log/syslog*
+            exclude_files:
+              - .gz$
+            multiline:
+              pattern: ^\s
+              match: after
+            processors:
+              - add_locale: null
+        meta:
+          package:
+            name: system
+            version: 1.16.2
+      - id: winlog-system-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+        revision: 1
+        name: system-1
+        type: winlog
+        data_stream:
+          namespace: default
+        use_output: default
+        streams:
+          - id: winlog-system.application-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: logs
+              dataset: system.application
+            name: Application
+            condition: '${host.platform} == ''windows'''
+            ignore_older: 72h
+          - id: winlog-system.security-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: logs
+              dataset: system.security
+            name: Security
+            condition: '${host.platform} == ''windows'''
+            ignore_older: 72h
+          - id: winlog-system.system-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: logs
+              dataset: system.system
+            name: System
+            condition: '${host.platform} == ''windows'''
+            ignore_older: 72h
+        meta:
+          package:
+            name: system
+            version: 1.16.2
+      - id: system/metrics-system-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+        revision: 1
+        name: system-1
+        type: system/metrics
+        data_stream:
+          namespace: default
+        use_output: default
+        streams:
+          - id: system/metrics-system.cpu-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: metrics
+              dataset: system.cpu
+            metricsets:
+              - cpu
+            cpu.metrics:
+              - percentages
+              - normalized_percentages
+            period: 10s
+          - id: system/metrics-system.diskio-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: metrics
+              dataset: system.diskio
+            metricsets:
+              - diskio
+            diskio.include_devices: null
+            period: 10s
+          - id: >-
+              system/metrics-system.filesystem-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: metrics
+              dataset: system.filesystem
+            metricsets:
+              - filesystem
+            period: 1m
+            processors:
+              - drop_event.when.regexp:
+                  system.filesystem.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
+          - id: system/metrics-system.fsstat-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: metrics
+              dataset: system.fsstat
+            metricsets:
+              - fsstat
+            period: 1m
+            processors:
+              - drop_event.when.regexp:
+                  system.fsstat.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
+          - id: system/metrics-system.load-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: metrics
+              dataset: system.load
+            metricsets:
+              - load
+            condition: '${host.platform} != ''windows'''
+            period: 10s
+          - id: system/metrics-system.memory-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: metrics
+              dataset: system.memory
+            metricsets:
+              - memory
+            period: 10s
+          - id: system/metrics-system.network-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: metrics
+              dataset: system.network
+            metricsets:
+              - network
+            period: 10s
+            network.interfaces: null
+          - id: system/metrics-system.process-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: metrics
+              dataset: system.process
+            metricsets:
+              - process
+            period: 10s
+            process.include_top_n.by_cpu: 5
+            process.include_top_n.by_memory: 5
+            process.cmdline.cache.enabled: true
+            process.cgroups.enabled: false
+            process.include_cpu_ticks: false
+            processes:
+              - .*
+          - id: >-
+              system/metrics-system.process.summary-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: metrics
+              dataset: system.process.summary
+            metricsets:
+              - process_summary
+            period: 10s
+          - id: >-
+              system/metrics-system.socket_summary-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: metrics
+              dataset: system.socket_summary
+            metricsets:
+              - socket_summary
+            period: 10s
+          - id: system/metrics-system.uptime-b9387ba6-0242-42c2-8787-dc2f3a5ebc76
+            data_stream:
+              type: metrics
+              dataset: system.uptime
+            metricsets:
+              - uptime
+            period: 10s
+        meta:
+          package:
+            name: system
+            version: 1.16.2
+      - id: filestream-audit-logs-a821a987-e0c5-4dc5-8265-83c4c6d16dcc
+        revision: 1
+        name: kubernetes-1
+        type: filestream
+        data_stream:
+          namespace: default
+        use_output: default
+        streams:
+          - id: >-
+              filestream-kubernetes.audit_logs-a821a987-e0c5-4dc5-8265-83c4c6d16dcc
+            data_stream:
+              type: logs
+              dataset: kubernetes.audit_logs
+            paths:
+              - /var/log/kubernetes/kube-apiserver-audit.log
+            exclude_files:
+              - .gz$
+            parsers:
+              - ndjson:
+                  add_error_key: true
+                  target: kubernetes_audit
+            processors:
+              - rename:
+                  fields:
+                    - from: kubernetes_audit
+                      to: kubernetes.audit
+              - drop_fields:
+                  when:
+                    has_fields: kubernetes.audit.responseObject
+                  fields:
+                    - kubernetes.audit.responseObject.metadata
+              - drop_fields:
+                  when:
+                    has_fields: kubernetes.audit.requestObject
+                  fields:
+                    - kubernetes.audit.requestObject.metadata
+              - script:
+                  lang: javascript
+                  id: dedot_annotations
+                  source: |
+                    function process(event) {
+                      var audit = event.Get("kubernetes.audit");
+                      for (var annotation in audit["annotations"]) {
+                        var annotation_dedoted = annotation.replace(/\./g,'_')
+                        event.Rename("kubernetes.audit.annotations."+annotation, "kubernetes.audit.annotations."+annotation_dedoted)
+                      }
+                      return event;
+                    } function test() {
+                      var event = process(new Event({ "kubernetes": { "audit": { "annotations": { "authorization.k8s.io/decision": "allow", "authorization.k8s.io/reason": "RBAC: allowed by ClusterRoleBinding \"system:kube-scheduler\" of ClusterRole \"system:kube-scheduler\" to User \"system:kube-scheduler\"" } } } }));
+                      if (event.Get("kubernetes.audit.annotations.authorization_k8s_io/decision") !== "allow") {
+                          throw "expected kubernetes.audit.annotations.authorization_k8s_io/decision === allow";
+                      }
+                    }
+        meta:
+          package:
+            name: kubernetes
+            version: 1.21.2
+    revision: 2
+    agent:
+      monitoring:
+        namespace: default
+        use_output: default
+        enabled: true
+        logs: true
+        metrics: true
+    output_permissions:
+      default:
+        _elastic_agent_monitoring:
+          indices:
+            - names:
+                - logs-elastic_agent.apm_server-default
+              privileges: &ref_0
+                - auto_configure
+                - create_doc
+            - names:
+                - metrics-elastic_agent.apm_server-default
+              privileges: *ref_0
+            - names:
+                - logs-elastic_agent.auditbeat-default
+              privileges: *ref_0
+            - names:
+                - metrics-elastic_agent.auditbeat-default
+              privileges: *ref_0
+            - names:
+                - logs-elastic_agent.cloudbeat-default
+              privileges: *ref_0
+            - names:
+                - metrics-elastic_agent.cloudbeat-default
+              privileges: *ref_0
+            - names:
+                - logs-elastic_agent-default
+              privileges: *ref_0
+            - names:
+                - metrics-elastic_agent.elastic_agent-default
+              privileges: *ref_0
+            - names:
+                - metrics-elastic_agent.endpoint_security-default
+              privileges: *ref_0
+            - names:
+                - logs-elastic_agent.endpoint_security-default
+              privileges: *ref_0
+            - names:
+                - logs-elastic_agent.filebeat-default
+              privileges: *ref_0
+            - names:
+                - metrics-elastic_agent.filebeat-default
+              privileges: *ref_0
+            - names:
+                - logs-elastic_agent.fleet_server-default
+              privileges: *ref_0
+            - names:
+                - metrics-elastic_agent.fleet_server-default
+              privileges: *ref_0
+            - names:
+                - logs-elastic_agent.heartbeat-default
+              privileges: *ref_0
+            - names:
+                - metrics-elastic_agent.heartbeat-default
+              privileges: *ref_0
+            - names:
+                - logs-elastic_agent.metricbeat-default
+              privileges: *ref_0
+            - names:
+                - metrics-elastic_agent.metricbeat-default
+              privileges: *ref_0
+            - names:
+                - logs-elastic_agent.osquerybeat-default
+              privileges: *ref_0
+            - names:
+                - metrics-elastic_agent.osquerybeat-default
+              privileges: *ref_0
+            - names:
+                - logs-elastic_agent.packetbeat-default
+              privileges: *ref_0
+            - names:
+                - metrics-elastic_agent.packetbeat-default
+              privileges: *ref_0
+        _elastic_agent_checks:
+          cluster:
+            - monitor
+        b9387ba6-0242-42c2-8787-dc2f3a5ebc76:
+          indices:
+            - names:
+                - logs-system.auth-default
+              privileges: *ref_0
+            - names:
+                - logs-system.syslog-default
+              privileges: *ref_0
+            - names:
+                - logs-system.application-default
+              privileges: *ref_0
+            - names:
+                - logs-system.security-default
+              privileges: *ref_0
+            - names:
+                - logs-system.system-default
+              privileges: *ref_0
+            - names:
+                - metrics-system.cpu-default
+              privileges: *ref_0
+            - names:
+                - metrics-system.diskio-default
+              privileges: *ref_0
+            - names:
+                - metrics-system.filesystem-default
+              privileges: *ref_0
+            - names:
+                - metrics-system.fsstat-default
+              privileges: *ref_0
+            - names:
+                - metrics-system.load-default
+              privileges: *ref_0
+            - names:
+                - metrics-system.memory-default
+              privileges: *ref_0
+            - names:
+                - metrics-system.network-default
+              privileges: *ref_0
+            - names:
+                - metrics-system.process-default
+              privileges: *ref_0
+            - names:
+                - metrics-system.process.summary-default
+              privileges: *ref_0
+            - names:
+                - metrics-system.socket_summary-default
+              privileges: *ref_0
+            - names:
+                - metrics-system.uptime-default
+              privileges: *ref_0
+        a821a987-e0c5-4dc5-8265-83c4c6d16dcc:
+          indices:
+            - names:
+                - logs-kubernetes.audit_logs-default
+              privileges: *ref_0
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: elastic-agent
+  namespace: kube-system
+  labels:
+    app: elastic-agent
+spec:
+  selector:
+    matchLabels:
+      app: elastic-agent
+  template:
+    metadata:
+      labels:
+        app: elastic-agent
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+      serviceAccountName: elastic-agent
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: elastic-agent
+          image: docker.elastic.co/beats/elastic-agent:8.3.3
+          args: [
+            "-c", "/etc/agent.yml",
+            "-e",
+            "-d", "'*'",
+          ]
+          env:
+            - name: ES_USERNAME
+              value: "elastic"
+            - name: ES_PASSWORD
+              value: "changeme"
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          securityContext:
+            runAsUser: 0
+          resources:
+            limits:
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          volumeMounts:
+            - name: datastreams
+              mountPath: /etc/agent.yml
+              readOnly: true
+              subPath: agent.yml
+            - name: proc
+              mountPath: /hostfs/proc
+              readOnly: true
+            - name: etc-kubernetes
+              mountPath: /hostfs/etc/kubernetes
+            - name: var-lib
+              mountPath: /hostfs/var/lib
+              readOnly: true
+            - name: cgroup
+              mountPath: /hostfs/sys/fs/cgroup
+              readOnly: true
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+            - name: varlog
+              mountPath: /var/log
+              readOnly: true
+            - name: passwd
+              mountPath: /hostfs/etc/passwd
+              readOnly: true
+            - name: group
+              mountPath: /hostfs/etc/group
+              readOnly: true
+            - name: systemd
+              mountPath: /hostfs/etc/systemd
+              readOnly: true
+      volumes:
+        - name: datastreams
+          configMap:
+            defaultMode: 0640
+            name: agent-node-datastreams
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: etc-kubernetes
+          hostPath:
+            path: /etc/kubernetes
+        - name: var-lib
+          hostPath:
+            path: /var/lib
+        - name: passwd
+          hostPath:
+            path: /etc/passwd
+        - name: group
+          hostPath:
+            path: /etc/group
+        - name: cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: systemd
+          hostPath:
+            path: /etc/systemd
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: elastic-agent
+subjects:
+  - kind: ServiceAccount
+    name: elastic-agent
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: elastic-agent
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: kube-system
+  name: elastic-agent
+subjects:
+  - kind: ServiceAccount
+    name: elastic-agent
+    namespace: kube-system
+roleRef:
+  kind: Role
+  name: elastic-agent
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: elastic-agent-kubeadm-config
+  namespace: kube-system
+subjects:
+  - kind: ServiceAccount
+    name: elastic-agent
+    namespace: kube-system
+roleRef:
+  kind: Role
+  name: elastic-agent-kubeadm-config
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: elastic-agent
+  labels:
+    k8s-app: elastic-agent
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - namespaces
+      - events
+      - pods
+      - services
+      - configmaps
+      - serviceaccounts
+    verbs: ["get", "list", "watch"]
+  # Enable this rule only if planing to use kubernetes_secrets provider
+  #- apiGroups: [""]
+  #  resources:
+  #  - secrets
+  #  verbs: ["get"]
+  - apiGroups: ["extensions"]
+    resources:
+      - replicasets
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources:
+      - statefulsets
+      - deployments
+      - replicasets
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources:
+      - jobs
+      - cronjobs
+    verbs: ["get", "list", "watch"]
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/stats
+    verbs:
+      - get
+  # required for apiserver
+  - nonResourceURLs:
+      - "/metrics"
+    verbs:
+      - get
+  # required for cloudbeat
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources:
+      - clusterrolebindings
+      - clusterroles
+      - rolebindings
+      - roles
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources:
+      - ingressclasses
+      - ingresses
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["policy"]
+    resources:
+      - podsecuritypolicies
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: elastic-agent
+  # should be the namespace where elastic-agent is running
+  namespace: kube-system
+  labels:
+    k8s-app: elastic-agent
+rules:
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs: ["get", "create", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: elastic-agent-kubeadm-config
+  namespace: kube-system
+  labels:
+    k8s-app: elastic-agent
+rules:
+  - apiGroups: [""]
+    resources:
+      - configmaps
+    resourceNames:
+      - kubeadm-config
+    verbs: ["get"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: elastic-agent
+  namespace: kube-system
+  labels:
+    k8s-app: elastic-agent
+---

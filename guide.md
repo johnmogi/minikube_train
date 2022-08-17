@@ -21,10 +21,6 @@ https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/cre
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
 
 
-https://theekshanawj.medium.com/kubernetes-deploying-a-nodejs-app-in-minikube-local-development-92df31e0b037
-
-
-
  <!-- https://www.digitalocean.com/community/tutorials/how-to-set-up-an-elasticsearch-fluentd-and-kibana-efk-logging-stack-on-kubernetes
 
  kubectl works.
@@ -37,5 +33,6 @@ https://theekshanawj.medium.com/kubernetes-deploying-a-nodejs-app-in-minikube-lo
 
 https://theekshanawj.medium.com/kubernetes-deploying-a-nodejs-app-in-minikube-local-development-92df31e0b037
 
-docker build -t weightapp .
+docker build -t app .
 docker run -p 3000:3000 app 
+docker run -d -p 3000:3000 app
